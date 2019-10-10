@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  License: Apache-2.0
+Description: 'AWS CloudFormation Sample Template '
+
+Parameters:
+  UserName:
+    Type: String
+    Default: "zerodevs"
+    Description: New account iam username
+    MinLength: '1'
+    MaxLength: '40'
+    ConstraintDescription: the username must be between 1 and 40 characters
+
+  Password:
+    NoEcho: 'true'
+    Type: String
+    Description: New account password
+    MinLength: '1'
+    MaxLength: '40'
+    ConstraintDescription: the password must be between 1 and 40 characters
+  
+  IamUserPolicyName:
+    Type: String
+    Description: New account iam username policy
+    MinLength: '1'
+    MaxLength: '40'
+    ConstraintDescription: the policyname must be between 1 and 40 characters 
+
+  BucketName:
+    Type: String
+    Default: "zerodevs"
+    Description: Bucket name which is required to give this iam user access
+    MinLength: '1'
+    MaxLength: '40'
+    ConstraintDescription: the bucket must be between 1 and 40 characters  
+
+Resources:
+  IamUser:
+    Type: AWS::IAM::User
+    Properties:
+      LoginProfile:
+        Password: !Ref Password
+      UserName: !Ref UserName
+
+  IamUserPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Ref IamUserPolicyName
+      Users: 
+        - !Ref UserName
+      PolicyDocument:
+        Statement:
+          # Allow access to 
+          - Effect: Allow
+            Action:
+              - s3:GetBucketLocation
+              - s3:ListAllMyBuckets
+            Resource: '*'
+          # Allow access to 
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref BucketName
+            
+          # Allow access to 
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref BucketName
+                  - '/*'
